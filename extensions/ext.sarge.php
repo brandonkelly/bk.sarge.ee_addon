@@ -432,8 +432,7 @@ class Sarge
     /**
 	 * Edit Option
 	 *
-	 * To avoid notifications getting sent twice, we first set each weblog's
-	 * notification preference to something that's not meaningful to EE
+	 * Modify the <option>
 	 *
 	 * @param  string   $v          select option value
 	 * @param  string   $v2         select option display
