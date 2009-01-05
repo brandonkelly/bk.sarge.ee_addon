@@ -400,7 +400,7 @@ class Sarge
 
 		if ($this->settings['check_for_extension_updates'] == 'y')
 		{
-		    $sources[] = 'http://brandon-kelly.com/apps/versions.xml';
+		    $sources[] = 'http://brandon-kelly.com/downloads/versions.xml';
 		}
 		return $sources;
 
