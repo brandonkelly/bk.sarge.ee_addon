@@ -495,26 +495,49 @@ class Sarge
 		$tagdata = $this->get_last_call($tagdata);
 		
 		// Find all the selects
-		preg_match_all('/(<select.+?name\s*?=\s*?[\'"]field_id_(\d+)[^>]+>).+?<\/select>/is', $tagdata, $matches, PREG_OFFSET_CAPTURE);
+		preg_match_all('/(<select[^>]*\s+name\s*=\s*[\'"]field_id_(\d+)[\'"][^>]*>).*?<\/select>/is', $tagdata, $select_matches, PREG_OFFSET_CAPTURE);
 
 		// Return tagdata if there are none
-		if ( ! count($matches[0])) return $tagdata;
+		if ( ! count($select_matches[0])) return $tagdata;
+		
+		// Get the entry ID
+		preg_match('/<input[^>]*\s+name\s*?=\s*?[\'"]entry_id[\'"][^>]*\svalue\s*?=\s*?[\'"](\d+)[\'"]/', $tagdata, $entryid_match);
+		if (isset($entryid_match[1]))
+		{
+			$entry_id = $entryid_match[1];
+		}
 		
 		global $DB;
 		
 		// Add tagdata up to first select to $r
-		$r = substr($tagdata, 0, $matches[0][0][1]);
+		$r = substr($tagdata, 0, $select_matches[0][0][1]);
 		
-		$num_matches = count($matches[0]);
+		$num_matches = count($select_matches[0]);
 		for ($i=0; $i<$num_matches; $i++)
 		{
 			// Add unchanged select header to $r
-			$r .= $matches[1][$i][0].NL;
+			$r .= $select_matches[1][$i][0].NL;
+			
+			$field_id = $select_matches[2][$i][0];
+			
+			// Get the saved value
+			$data = FALSE;
+			if ($entry_id)
+			{
+				$data_query = $DB->query("SELECT field_id_{$field_id} data
+				                          FROM exp_weblog_data
+				                          WHERE entry_id='{$entry_id}'
+				                            AND field_id_{$field_id} != ''");
+				if($data_query->num_rows)
+				{
+					$data = $data_query->row['data'];
+				}
+			}
 			
 			// Get the list items
 			$query = $DB->query("SELECT field_list_items
 			                     FROM exp_weblog_fields
-			                     WHERE field_id='{$matches[2][$i][0]}'
+			                     WHERE field_id='{$field_id}'
 			                     LIMIT 1");
 			if ( ! $query->num_rows) continue;
 			
@@ -522,16 +545,16 @@ class Sarge
 			foreach($list_items as $list_item)
 			{
 				// Add the Sarge-modified option
-				$r .= $this->edit_option($list_item, $list_item, FALSE);
+				$r .= $this->edit_option($list_item, $list_item, ($data === $list_item), $data);
 			}
 			
 			// Add select footer to $r
 			$r .= '</select>';
 			
 			// Add tagdata up to next select to $r
-			$start = $matches[0][$i][1] + strlen($matches[0][$i][0]);
+			$start = $select_matches[0][$i][1] + strlen($select_matches[0][$i][0]);
 			$length = ($i < $num_matches-1)
-				? $matches[0][$i+1][1] - $start
+				? $select_matches[0][$i+1][1] - $start
 				: -1;
 			$r .= substr($tagdata, $start, $length);
 		}
