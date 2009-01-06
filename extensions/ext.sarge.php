@@ -39,7 +39,7 @@ class Sarge
 	 *
 	 * @var string
 	 */
-	var $version		= '1.1.0';
+	var $version		= '1.2.0';
 	
 	/**
 	 * Extension Description
@@ -312,7 +312,8 @@ class Sarge
 			array('hook'=>'lg_addon_update_register_addon',   'method'=>'register_my_addon_id'),
 			
 			// Edit Option
-			array('hook'=>'publish_form_field_select_option', 'method'=>'edit_option')
+			array('hook'=>'publish_form_field_select_option', 'method'=>'edit_option'),
+			array('hook'=>'weblog_standalone_form_end',       'method'=>'edit_saef')
 		);
 
 		foreach($extensions as $extension)
@@ -339,7 +340,7 @@ class Sarge
 			return FALSE;
 		}
 
-		if ($current < '1.1.0')
+		if ($current < '1.2.0')
 		{
 			// add new hooks
 			$this->activate_extension();
@@ -441,7 +442,7 @@ class Sarge
 	 * @see    http://expressionengine.com/developers/extension_hooks/publish_form_field_select_option/
 	 * @since  version 1.0.0
 	 */
-	function edit_option ($v, $v2, $selected, $field_data)
+	function edit_option($v, $v2, $selected, $field_data)
 	{
 		global $DSP;
 		
@@ -474,7 +475,69 @@ class Sarge
 			return '<optgroup label="'.$values[1].'">';
 		}
 		
-		return $DSP->input_select_option($values[1], $values[0], ($values[1] == $field_data));
+		return $DSP->input_select_option($values[1], $values[0], ($values[1] === $field_data));
+	}
+	
+	
+	
+	/**
+	 * Edit Stand Alone Entry Form
+	 *
+	 * Gives SAEF dropdowns the same treatment that normal Edit form dropdowns get
+	 *
+	 * @param  string   $tagdata   The tag data for the submission form at the end of processing
+	 * @return string              Modified $tagdata
+	 * @see    http://expressionengine.com/developers/extension_hooks/weblog_standalone_form_end/
+	 * @since  version 1.2.0
+	 */
+	function edit_saef($tagdata)
+	{
+		$tagdata = $this->get_last_call($tagdata);
+		
+		// Find all the selects
+		preg_match_all('/(<select.+?name\s*?=\s*?[\'"]field_id_(\d+)[^>]+>).+?<\/select>/is', $tagdata, $matches, PREG_OFFSET_CAPTURE);
+
+		// Return tagdata if there are none
+		if ( ! count($matches[0])) return $tagdata;
+		
+		global $DB;
+		
+		// Add tagdata up to first select to $r
+		$r = substr($tagdata, 0, $matches[0][0][1]);
+		
+		$num_matches = count($matches[0]);
+		for ($i=0; $i<$num_matches; $i++)
+		{
+			// Add unchanged select header to $r
+			$r .= $matches[1][$i][0].NL;
+			
+			// Get the list items
+			$query = $DB->query("SELECT field_list_items
+			                     FROM exp_weblog_fields
+			                     WHERE field_id='{$matches[2][$i][0]}'
+			                     LIMIT 1");
+			if ( ! $query->num_rows) continue;
+			
+			$list_items = explode("\n", $query->row['field_list_items']);
+			foreach($list_items as $list_item)
+			{
+				// Add the Sarge-modified option
+				$r .= $this->edit_option($list_item, $list_item, FALSE);
+			}
+			
+			// Add select footer to $r
+			$r .= '</select>';
+			
+			// Add tagdata up to next select to $r
+			$start = $matches[0][$i][1] + strlen($matches[0][$i][0]);
+			$length = ($i < $num_matches-1)
+				? $matches[0][$i+1][1] - $start
+				: -1;
+			$r .= substr($tagdata, $start, $length);
+		}
+		
+		
+		return $r;
 	}
 
 }
