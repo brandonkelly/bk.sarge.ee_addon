@@ -501,13 +501,19 @@ class Sarge
 		if ( ! count($select_matches[0])) return $tagdata;
 		
 		// Get the entry ID
-		preg_match('/<input[^>]*\s+name\s*?=\s*?[\'"]entry_id[\'"][^>]*\svalue\s*?=\s*?[\'"](\d+)[\'"]/', $tagdata, $entryid_match);
-		if (isset($entryid_match[1]))
-		{
-			$entry_id = $entryid_match[1];
-		}
+		preg_match('/<input[^>]*\s+name\s*?=\s*?[\'"]entry_id[\'"][^>]*\svalue\s*?=\s*?[\'"](\d+)[\'"]/i', $tagdata, $entryid_match);
+		$entry_id = isset($entryid_match[1])
+			? $entryid_match[1]
+			: FALSE;
 		
-		global $DB;
+		global $DSP, $DB;
+		
+		// Initialize Display
+		if ( ! ($DSP AND class_exists('Display')))
+		{
+			require PATH_CP.'cp.display'.EXT;
+			$DSP = new Display();
+		}
 		
 		// Add tagdata up to first select to $r
 		$r = substr($tagdata, 0, $select_matches[0][0][1]);
@@ -541,9 +547,12 @@ class Sarge
 			                     LIMIT 1");
 			if ( ! $query->num_rows) continue;
 			
-			$list_items = explode("\n", $query->row['field_list_items']);
+			$list_items = explode(NL, $query->row['field_list_items']);
 			foreach($list_items as $list_item)
 			{
+				// Strip the whitespace
+				$list_item = trim($list_item);
+				
 				// Add the Sarge-modified option
 				$r .= $this->edit_option($list_item, $list_item, ($data === $list_item), $data);
 			}
