@@ -22,7 +22,7 @@ Installation
 Configuration
 ----------------------------------------------------------------------
 
-From Playa’s Settings page, you can set the following preference:
+From Sarge’s Settings page, you can set the following preference:
 
 ####  Check for Sarge updates?  ######################################
 Powered by LG Addon Updater, Sarge can call home and check to see if
@@ -62,7 +62,7 @@ can take control of that value:
 
 Requirements
 ----------------------------------------------------------------------
-Playa requires ExpressionEngine 1.6+
+Sarge requires ExpressionEngine 1.6+
 
 
 Change Log
