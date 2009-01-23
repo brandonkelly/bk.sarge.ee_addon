@@ -25,8 +25,9 @@ Configuration
 From Sarge’s Settings page, you can set the following preference:
 
 ####  Check for Sarge updates?  ######################################
-Powered by LG Addon Updater, Sarge can call home and check to see if
-there’s a new update available.
+Powered by [LG Addon Updater](http://leevigraham.com/cms-customisation/expressionengine/lg-addon-updater/),
+Sarge can call home and check to see if there’s a new
+update available.
 
 
 Usage
