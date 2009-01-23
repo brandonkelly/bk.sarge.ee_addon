@@ -1,5 +1,5 @@
 
-Playa
+Sarge
 ======================================================================
 
 Sarge enhances ExpressionEngine’s built-in Drop Down List field by
@@ -35,7 +35,7 @@ Usage
 All Sarge-related Drop-Down List field customization takes place
 within the Select Options textarea in the Edit Custom Field form.
 
-####  Adding optgroups  ##############################################
+####  Adding `optgroups`  ############################################
 Here’s an example of options being grouped into optgroups:
 
     [optgroup] = Fruit
