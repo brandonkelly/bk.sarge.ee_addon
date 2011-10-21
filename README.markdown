@@ -55,7 +55,7 @@ By default, an option's value is the same as its name. With Sarge, you
 can take control of that value:
 
     Select a fruit =
-    
+
     Apple = apl
     Orange = org
     Mango = mgo
