@@ -19,35 +19,35 @@ class Sarge
 	 * @var array
 	 */
 	var $settings		= array();
-	
+
 	/**
 	 * Extension Name
 	 *
 	 * @var string
 	 */
 	var $name			= 'Sarge';
-	
+
 	/**
 	 * Extension Class Name
 	 *
 	 * @var string
 	 */
 	var $class_name     = 'Sarge';
-	
+
 	/**
 	 * Extension Version
 	 *
 	 * @var string
 	 */
 	var $version		= '1.2.0';
-	
+
 	/**
 	 * Extension Description
 	 *
 	 * @var string
 	 */
 	var $description	= 'Add grouping and values to your drop-down fields';
-	
+
 	/**
 	 * Extension Settings Exist
 	 *
@@ -56,16 +56,16 @@ class Sarge
 	 * @var string
 	 */
 	var $settings_exist	= 'y';
-	
+
 	/**
 	 * Documentation URL
 	 *
 	 * @var string
 	 */
 	var $docs_url		= 'http://brandon-kelly.com/apps/sarge?utm_campaign=sarge_em';
-	
-	
-	
+
+
+
     /**
 	 * Extension Constructor
 	 *
@@ -76,9 +76,9 @@ class Sarge
 	{
 		$this->settings = $this->get_site_settings($settings);
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Get All Settings
 	 *
@@ -104,7 +104,7 @@ class Sarge
 
 	/**
 	 * Get Default Settings
-	 * 
+	 *
 	 * @return array   Default settings for site
 	 * @since 1.1.0
 	 */
@@ -129,9 +129,9 @@ class Sarge
 	function get_site_settings($settings=array())
 	{
 		global $PREFS;
-		
+
 		$site_settings = $this->get_default_settings();
-		
+
 		$site_id = $PREFS->ini('site_id');
 		if (isset($settings[$site_id]))
 		{
@@ -140,9 +140,9 @@ class Sarge
 
 		return $site_settings;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Settings Form
 	 *
@@ -172,7 +172,7 @@ class Sarge
 		// Donations button
 
 		$DSP->body = '';
-		
+
 		// Donations button
 	    $DSP->body .= '<div style="float:right;">'
 	                . '<a style="display:block; margin:-2px 10px 0 0; padding:5px 0 5px 70px; width:190px; height:15px; font-size:12px; line-height:15px;'
@@ -273,9 +273,9 @@ class Sarge
 		            SET settings = '".addslashes(serialize($settings))."'
 		            WHERE class = '{$this->class_name}'");
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Activate Extension
 	 *
@@ -310,7 +310,7 @@ class Sarge
 			// LG Addon Updater
 			array('hook'=>'lg_addon_update_register_source',  'method'=>'register_my_addon_source'),
 			array('hook'=>'lg_addon_update_register_addon',   'method'=>'register_my_addon_id'),
-			
+
 			// Edit Option
 			array('hook'=>'publish_form_field_select_option', 'method'=>'edit_option'),
 			array('hook'=>'weblog_standalone_form_end',       'method'=>'edit_saef')
@@ -322,9 +322,9 @@ class Sarge
 			$DB->query($DB->insert_string('exp_extensions', $ext));
 		}
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Update Extension
 	 *
@@ -346,7 +346,7 @@ class Sarge
 			$this->activate_extension();
 			return;
 		}
-		
+
 		// update the version
 		$DB->query("UPDATE exp_extensions
 		            SET version = '".$DB->escape_str($this->version)."'
@@ -384,9 +384,9 @@ class Sarge
 
 		return ($EXT->last_call !== FALSE) ? $EXT->last_call : $param;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Register a New Addon Source
 	 *
@@ -427,9 +427,9 @@ class Sarge
 	    }
 	    return $addons;
 	}
-    
-    
-    
+
+
+
     /**
 	 * Edit Option
 	 *
@@ -445,14 +445,14 @@ class Sarge
 	function edit_option($v, $v2, $selected, $field_data)
 	{
 		global $DSP;
-		
+
 		$values = preg_split("/\s*=\s*/", $v);
 		for ($i=0; $i<count($values); $i++)
 		{
 			$values[$i] = trim($values[$i]);
 		}
-		
-		
+
+
 		if (count($values) == 1)
 		{
 			// -- If empty
@@ -460,26 +460,26 @@ class Sarge
 			{
 				return $DSP->input_select_option('', '', FALSE);
 			}
-			
+
 			// -- If /optgroup
 			if ($values[0] == '[/optgroup]')
 			{
 				return '</optgroup>';
 			}
-			
+
 			return $DSP->input_select_option($v, $v, $selected);
 		}
-		
+
 		if ($values[0] == "[optgroup]")
 		{
 			return '<optgroup label="'.$values[1].'">';
 		}
-		
+
 		return $DSP->input_select_option($values[1], $values[0], ($values[1] === $field_data));
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Edit Stand Alone Entry Form
 	 *
@@ -493,39 +493,39 @@ class Sarge
 	function edit_saef($tagdata)
 	{
 		$tagdata = $this->get_last_call($tagdata);
-		
+
 		// Find all the selects
 		preg_match_all('/(<select[^>]*\s+name\s*=\s*[\'"]field_id_(\d+)[\'"][^>]*>).*?<\/select>/is', $tagdata, $select_matches, PREG_OFFSET_CAPTURE);
 
 		// Return tagdata if there are none
 		if ( ! count($select_matches[0])) return $tagdata;
-		
+
 		// Get the entry ID
 		preg_match('/<input[^>]*\s+name\s*?=\s*?[\'"]entry_id[\'"][^>]*\svalue\s*?=\s*?[\'"](\d+)[\'"]/i', $tagdata, $entryid_match);
 		$entry_id = isset($entryid_match[1])
 			? $entryid_match[1]
 			: FALSE;
-		
+
 		global $DSP, $DB;
-		
+
 		// Initialize Display
 		if ( ! ($DSP AND class_exists('Display')))
 		{
 			require PATH_CP.'cp.display'.EXT;
 			$DSP = new Display();
 		}
-		
+
 		// Add tagdata up to first select to $r
 		$r = substr($tagdata, 0, $select_matches[0][0][1]);
-		
+
 		$num_matches = count($select_matches[0]);
 		for ($i=0; $i<$num_matches; $i++)
 		{
 			// Add unchanged select header to $r
 			$r .= $select_matches[1][$i][0].NL;
-			
+
 			$field_id = $select_matches[2][$i][0];
-			
+
 			// Get the saved value
 			$data = FALSE;
 			if ($entry_id)
@@ -539,27 +539,27 @@ class Sarge
 					$data = $data_query->row['data'];
 				}
 			}
-			
+
 			// Get the list items
 			$query = $DB->query("SELECT field_list_items
 			                     FROM exp_weblog_fields
 			                     WHERE field_id='{$field_id}'
 			                     LIMIT 1");
 			if ( ! $query->num_rows) continue;
-			
+
 			$list_items = explode(NL, $query->row['field_list_items']);
 			foreach($list_items as $list_item)
 			{
 				// Strip the whitespace
 				$list_item = trim($list_item);
-				
+
 				// Add the Sarge-modified option
 				$r .= $this->edit_option($list_item, $list_item, ($data === $list_item), $data);
 			}
-			
+
 			// Add select footer to $r
 			$r .= '</select>';
-			
+
 			// Add tagdata up to next select to $r
 			$start = $select_matches[0][$i][1] + strlen($select_matches[0][$i][0]);
 			$length = ($i < $num_matches-1)
@@ -567,8 +567,8 @@ class Sarge
 				: -1;
 			$r .= substr($tagdata, $start, $length);
 		}
-		
-		
+
+
 		return $r;
 	}
 
